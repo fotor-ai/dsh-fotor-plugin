@@ -9,7 +9,7 @@
     dshHome: /absolute/path/to/dsh-home
     agentsHome: /absolute/path/to/agents-home
     customSkillDirs:
-      - /absolute/path/to/installed/fotor/skills
+      - /absolute/path/to/installed/scoped-fotor/skills
     watch: false
 - id: fotor-mcp
   disabled: true
@@ -21,7 +21,7 @@
       enabled: false
     command: /absolute/path/to/node
     args:
-      - /absolute/path/to/bridge/node_modules/mcp-remote/dist/proxy.js
+      - /absolute/path/from/dependency-query/mcp-remote/dist/proxy.js
       - https://mcp.fotor.com/mcp
       - '3335'
       - --host

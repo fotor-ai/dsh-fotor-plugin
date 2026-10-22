@@ -1,6 +1,6 @@
 {
-  "name": "fotor",
-  "version": "0.5.1-test.2",
+  "name": "@fotor-ai/dsh-fotor-plugin",
+  "version": "0.6.0-test.1",
   "description": "Connect to Fotor's production MCP service.",
   "author": {
     "name": "Fotor"
@@ -10,17 +10,15 @@
   "license": "Apache-2.0",
   "private": true,
   "engines": {
-    "dsh": ">=0.2.1-rc.2 <0.3.0-0"
+    "dsh": ">=0.2.1-rc.2 <0.3.0-0",
+    "node": ">=24.2.0 <25.0.0 || 26.x"
   },
   "icon": "./assets/logo.svg",
   "files": [
     "cordis.patch.yml",
     "configuration.example.yml",
     "INSTALL.md",
-    "bridge-package.example.json",
-    "bridge-package-lock.example.json",
     "skills",
-    "references",
     "assets",
     "README.md",
     "LICENSE"
@@ -29,5 +27,8 @@
     "bundle": {
       "patch": "./cordis.patch.yml"
     }
+  },
+  "dependencies": {
+    "mcp-remote": "0.15.1"
   }
 }

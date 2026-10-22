@@ -1,249 +1,177 @@
-<a id="install-and-use-fotor-for-dsh"></a>
+# Install and use Fotor with DeepSeek Harness
 
-# Install and use Fotor for DeepSeek Harness
+> Requires stable Node 24.2.0 or later within 24.x, or stable Node 26.x. The fixed DeepSeek Harness 0.2.1-rc.2 launcher needs `import.meta.main`, introduced in Node 24.2.0. Earlier Node 24 releases are outside the supported range. Use the release's recorded runtime results for the exact tested versions.
 
-DeepSeek Harness is abbreviated as `dsh` in commands and native identifiers.
+DeepSeek Harness is abbreviated as `dsh` in commands and native identifiers. This guide is self-contained for the independent package. Source 0.6.0 is unpublished: use public commands below only after the selected GitHub or npm channel contains that version. Existing 0.5.1 installations retain their original installation procedure until migrated.
 
-**Fotor does not install mcp-remote automatically.** You, or an Agent acting on your installation request, install the pinned bridge in a separate directory. After configuration, DeepSeek Harness starts that existing bridge. Bundle installation, skill loading, Fotor authorization and website login are separate steps.
+## 1. Check prerequisites and select a profile
 
-This guide travels with the complete Bundle. Start here for a first installation, a missing bridge, an unconfigured path or missing skills. For an already configured connection, use [authentication and recovery](skills/fotor-connect/references/authentication.md). Keep one Fotor installation per selected profile.
-
-## 1. Check prerequisites and choose locations
-
-The supported preparation baseline is **Linux, DeepSeek Harness Web `0.2.1-rc.2`, Node `24.17.0`, mcp-remote `0.15.1`**. DeepSeek Harness must already run, with its native package manager available. Git-source installation also requires Git. Use the [official DeepSeek Harness quickstart](https://deepseek-harness.github.io/deepseek-harness/en/guide/quickstart) and [Node downloads](https://nodejs.org/en/download/) to prepare a missing runtime separately; preserve the user's daily installation. The manifest permits `>=0.2.1-rc.2 <0.3.0-0`, including matching 0.2.x prereleases. Only the stated baseline has actual acceptance evidence; compatibility admission does not establish verification of other versions.
-
-Set these shell variables once, replacing every `/absolute/path/...` value. They are installation parameters, not credentials:
-
-```bash
-FOTOR_NODE=/absolute/path/to/node
-FOTOR_NPM_CLI=/absolute/path/to/npm-cli.js
-FOTOR_SOURCE=/absolute/path/to/complete/fotor
-FOTOR_BRIDGE=/absolute/path/to/fotor-bridge-0.15.1
-FOTOR_PROFILE=web
-FOTOR_PATCH=/absolute/path/to/fotor.patch.yml
-FOTOR_AUTH=/absolute/path/to/fotor-authorization
-FOTOR_WORKSPACE=/absolute/path/to/workspace
-```
-
-| Parameter | How to choose it |
-| --- | --- |
-| `FOTOR_NODE` | Absolute executable from the selected Node installation. Resolve a version-manager shim to its real executable. |
-| `FOTOR_NPM_CLI` | Absolute npm JavaScript CLI entry, usually `lib/node_modules/npm/bin/npm-cli.js` under an existing npm installation. Verify it runs under `FOTOR_NODE`; an npm shell wrapper is not this entry. |
-| `FOTOR_SOURCE` | Complete DeepSeek Harness package directory acquired in step 2, containing this guide and `package.json`. |
-| `FOTOR_BRIDGE` | New persistent directory outside the Bundle and any source checkout; only the bridge and its install inputs live here. |
-| `FOTOR_PROFILE` | Existing intended DeepSeek Harness profile; `web` is the accepted baseline. Use this same profile for all native commands. |
-| `FOTOR_PATCH` | New external override file, retained across package updates. Its parent directory must exist. |
-| `FOTOR_AUTH` | Fotor-only bridge credential directory outside the Bundle. Keep the same directory through updates and ordinary recovery. |
-| `FOTOR_WORKSPACE` | Existing absolute working directory for this DeepSeek Harness session and its MCP process. |
-
-For a rehearsal, first select dedicated `DSH_HOME`, `DSH_AGENTS_HOME` and working directories, and keep them set in the same shell for installation, configuration checks and launch. For an existing installation, retain the user's intended locations instead. Do not replace an existing Fotor registration or override without resolving the conflict.
-
-On this baseline, unset home overrides default to `~/.dsh` and `~/.agents`. Resolve them to absolute paths for the YAML. For an isolated rehearsal, use new locations instead:
-
-```bash
-export DSH_HOME=/absolute/path/to/rehearsal/dsh-home
-export DSH_AGENTS_HOME=/absolute/path/to/rehearsal/agents-home
-mkdir -p "$DSH_HOME" "$DSH_AGENTS_HOME" "$FOTOR_WORKSPACE"
-```
+Use Linux DeepSeek Harness Web `0.2.1-rc.2` (source `687f282e8625c6b8d11ff58211a90524be2e4317`), its available native package manager, and a stable Node **24.2.0 or later within 24.x, or 26.x**. Node 24.0.x, 24.1.x, 25.x, 27.x and prereleases are outside the declared range. The host range remains `>=0.2.1-rc.2 <0.3.0-0`; admission is not evidence that every host/runtime combination has been tested. Consult the installed release's acceptance record. Desktop, headless and ACP require separate acceptance.
 
 ```bash
 dsh --version
-"$FOTOR_NODE" --version
-"$FOTOR_NODE" "$FOTOR_NPM_CLI" --version
-git --version
+node --version
+dsh plugin --profile web root
 ```
 
-**Done when:** DeepSeek Harness reports the accepted version, Node reports `v24.17.0`, npm runs under that Node, and the selected locations are known. Stop on a missing or mismatched runtime; do not silently install a newer bridge or upgrade daily Node.
+Git sources additionally require Git. Follow the [host quickstart](https://deepseek-harness.github.io/deepseek-harness/en/guide/quickstart) or [Node downloads](https://nodejs.org/en/download/) for missing prerequisites. Node is not bundled. Preserve daily installations; do not upgrade them to satisfy an acceptance run.
 
-## 2. Obtain a complete package
+Select one profile, working directory and Fotor-only credential directory outside the installed package. Inspect existing Fotor components before changing anything. A model-provider account is separate from Fotor OAuth.
 
-Obtain one complete DeepSeek Harness package from the intended source revision:
+**Done when:** the host and Node versions are known, the native package manager works, and the profile and external storage locations are selected.
 
-| Distribution source | Complete package location |
-| --- | --- |
-| Independent `fotor-ai/dsh-fotor-plugin` repository | Repository root, once that channel is published |
-| Internal development checkout | The complete `plugins/dsh/fotor` source package; not a public installation channel |
+## 2. Install one Bundle source
 
-Retain the entire package, including skills and their local references, examples, Logo and license. The installed package contains `package.json`, this guide and `skills/` directly. Do not assemble a root package by copying only a manifest or patch. The multi-platform public repository documents this independent source; it no longer distributes new DeepSeek Harness packages. Historical v0.5.0 packages remain unchanged for existing users and migration evidence.
+The package name is **`@fotor-ai/dsh-fotor-plugin`** for both sources. Installing it automatically obtains the pinned **mcp-remote 0.15.1** runtime. There is no separate bridge installation command. Git installation downloads the dependency through the host package manager; npm artifacts already carry the bridge and its complete runtime dependency tree. Installation starts neither the bridge nor OAuth.
 
-The source README provides the internal/local installation entry; an exported README provides its channel's Git entry. Select a revision containing both the Bundle and this guide's JSON examples. Older snapshots may contain a Bundle without these setup materials. Do not assemble files from different revisions.
-
-For a public Git checkout, select the intended available branch of the independent repository. The test selector is `release/test`; production uses its default branch only after publication. A test suffix still connects to production Fotor services. Availability in an internal source does not establish a public release.
-
-For example, after the independent test channel is published:
+Choose exactly one command after its channel is published:
 
 ```bash
-git clone --branch release/test --single-branch https://github.com/fotor-ai/dsh-fotor-plugin.git /absolute/path/to/fotor-source
-git -C /absolute/path/to/fotor-source rev-parse HEAD
-FOTOR_SOURCE=/absolute/path/to/fotor-source
+# GitHub production: default branch.
+dsh plugin --profile web add "git+https://github.com/fotor-ai/dsh-fotor-plugin.git" --ignore-scripts
+# GitHub test channel.
+dsh plugin --profile web add "git+https://github.com/fotor-ai/dsh-fotor-plugin.git#release/test" --ignore-scripts
+# npm production: latest dist-tag.
+dsh plugin --profile web add "@fotor-ai/dsh-fotor-plugin" --ignore-scripts
+# npm test channel.
+dsh plugin --profile web add "@fotor-ai/dsh-fotor-plugin@next" --ignore-scripts
 ```
 
-For the independent distribution, obtain `https://github.com/fotor-ai/dsh-fotor-plugin.git` only after the required channel exists, and set `FOTOR_SOURCE` to that checkout root. The corresponding native Git source has no `path:` selector: production uses `git+https://github.com/fotor-ai/dsh-fotor-plugin.git` and testing uses `git+https://github.com/fotor-ai/dsh-fotor-plugin.git#release/test`. Follow the current package README for channel availability.
+For an internal or local rehearsal, replace the source with the absolute path to the complete independent package. The multi-platform repository root is Pi's facade and is not a DeepSeek Harness package. Never install both sources, aliases, or the legacy `fotor` alongside the scoped package.
 
-**Done when:** `FOTOR_SOURCE` contains [the bridge manifest example](bridge-package.example.json), [the reviewed lock example](bridge-package-lock.example.json), [the full configuration example](configuration.example.yml) and the complete package resources.
+**Done when:** native installation succeeds and reports the scoped identity and expected version. Preserve a failed dependency download as a failed installation; do not continue with a missing bridge or use an unpinned `npx` workaround.
 
-## 3. Install the external bridge
+## 3. Resolve the installed package and bridge
 
-The example filenames are inert. Copy them to the new external directory as npm's `package.json` and `package-lock.json`. Their private package name retains the original acceptance identity; it is not the Fotor Bundle name or an npm publication.
+Use the original profile and package-manager store. Set variables from native output and verified absolute paths:
 
 ```bash
-mkdir "$FOTOR_BRIDGE"
-cp "$FOTOR_SOURCE/bridge-package.example.json" "$FOTOR_BRIDGE/package.json"
-cp "$FOTOR_SOURCE/bridge-package-lock.example.json" "$FOTOR_BRIDGE/package-lock.json"
-sha256sum "$FOTOR_BRIDGE/package-lock.json"
-```
-
-Require this lock SHA-256:
-
-```text
-da720cef01409be0f0952876bcc12b4f7e57ff6341c78168735f689bbf8fde27
-```
-
-If the directory already exists, inspect its non-credential manifest, lock and installed version before proceeding. Reuse an exact matching installation; stop on a conflict. Do not run `npm ci` in an unrelated directory: it replaces that directory's `node_modules`.
-
-Use separate empty npm configuration files and a bridge-local cache. The lock already records the dependency graph and registry integrity values; `npm ci` verifies downloaded content without resolving a new graph.
-
-```bash
-touch "$FOTOR_BRIDGE/npmrc" "$FOTOR_BRIDGE/npm-globalrc"
-"$FOTOR_NODE" "$FOTOR_NPM_CLI" ci --prefix "$FOTOR_BRIDGE" --userconfig "$FOTOR_BRIDGE/npmrc" --globalconfig "$FOTOR_BRIDGE/npm-globalrc" --cache "$FOTOR_BRIDGE/npm-cache" --ignore-scripts --no-audit --no-fund
-"$FOTOR_NODE" "$FOTOR_NPM_CLI" ls --prefix "$FOTOR_BRIDGE" --depth=0
-test -f "$FOTOR_BRIDGE/node_modules/mcp-remote/dist/client.js"
-test -f "$FOTOR_BRIDGE/node_modules/mcp-remote/dist/proxy.js"
-sha256sum "$FOTOR_BRIDGE/package-lock.json"
-```
-
-**Done when:** installation succeeds, `npm ls` reports `mcp-remote@0.15.1`, both entry files exist and the lock hash is unchanged. Keep these files outside Fotor. Connection requests use them directly, without `npx`, downloads or dependency updates.
-
-## 4. Install the Bundle and resolve its actual path
-
-Choose one source. A complete local package works without a public release:
-
-```bash
-dsh plugin --profile "$FOTOR_PROFILE" add "$FOTOR_SOURCE" --ignore-scripts
-```
-
-For an available public test revision:
-
-```bash
-dsh plugin --profile "$FOTOR_PROFILE" add "git+https://github.com/fotor-ai/dsh-fotor-plugin.git#release/test" --ignore-scripts
-```
-
-For production, use `git+https://github.com/fotor-ai/dsh-fotor-plugin.git` after confirming that the default branch contains the intended release. Keep the entire Git source quoted. Do not add both local and Git sources.
-
-DeepSeek Harness forwards package commands to its profile's package manager. Use its native dependency and root queries, then resolve the installed entry:
-
-```bash
-dsh plugin --profile "$FOTOR_PROFILE" why fotor
+FOTOR_PROFILE=web
+dsh plugin --profile "$FOTOR_PROFILE" why @fotor-ai/dsh-fotor-plugin
 dsh plugin --profile "$FOTOR_PROFILE" root
-FOTOR_INSTALLED="$(realpath "$(dsh plugin --profile "$FOTOR_PROFILE" root)/fotor")"
-cat "$FOTOR_INSTALLED/package.json"
-test -d "$FOTOR_INSTALLED/skills"
+FOTOR_INSTALLED="$(realpath "$(dsh plugin --profile "$FOTOR_PROFILE" root)/@fotor-ai/dsh-fotor-plugin")"
+dsh plugin --profile "$FOTOR_PROFILE" list mcp-remote --depth Infinity --parseable
+dsh plugin --profile "$FOTOR_PROFILE" why mcp-remote --json
 ```
 
-Read the recorded dependency spec and resolved revision in the selected profile's package manifest/lock when verifying a Git source. `why` alone does not prove the resolved commit. Keep the installed version, source and `FOTOR_INSTALLED` together for later updates.
+Choose the resolution route matching the installed manifest:
 
-If using a dedicated pnpm store for a rehearsal, select it on the first `add` with `--store-dir /absolute/path/to/task-pnpm-store`, and pass that same option to later `update` and `remove`. Existing profiles must retain their existing store; a conflicting store is not repaired by deleting caches.
+- **Git source:** the dependency query can return multiple paths. Select the mcp-remote 0.15.1 dependency owned by this exact Fotor installation; stop on ambiguity. pnpm can place it beside the package rather than inside it. Set `FOTOR_BRIDGE` to that verified absolute dependency path.
+- **npm artifact:** after verifying `bundleDependencies` names mcp-remote, resolve the bundled directory below. The native dependency list may omit bundled packages; an empty list alone is not a missing bridge.
 
-**Done when:** one installed `fotor` resolves to the intended package/version and source. Its `cordis.patch.yml` still disables both components, so installation has not scanned skills, launched the bridge or started OAuth.
+```bash
+# npm artifact only, after inspecting its manifest.
+FOTOR_BRIDGE="$(realpath "$FOTOR_INSTALLED/node_modules/mcp-remote")"
+```
+
+For either source, verify the selected location before configuring it:
+
+```bash
+FOTOR_NODE=/absolute/path/to/node
+cat "$FOTOR_INSTALLED/package.json"
+cat "$FOTOR_BRIDGE/package.json"
+test -f "$FOTOR_BRIDGE/dist/client.js"
+test -f "$FOTOR_BRIDGE/dist/proxy.js"
+```
+
+Git pins the direct bridge version; its transitive graph is resolved by the host and should be recorded when reproducing a result. The packaged lock file is the npm release-build input, not a promise that pnpm honors it during Git installation.
+
+**Done when:** the scoped package/version, bridge 0.15.1, both bridge entrypoints and all selected absolute paths are verified. A `why` result alone does not establish file completeness or the Git commit.
+
+## 4. Prepare complete configuration
+
+Copy [configuration.example.yml](configuration.example.yml) outside the installation and fill every placeholder:
+
+| Parameter | Source and lifetime |
+| --- | --- |
+| Profile | The native profile selected for installation; keep it for updates/removal |
+| Skill directory | Actual `FOTOR_INSTALLED` plus `/skills`; re-resolve after updates |
+| Node command | Absolute executable for the selected supported Node version |
+| Proxy/client entry | Actual `FOTOR_BRIDGE` plus `/dist/proxy.js` or `/dist/client.js`; re-resolve after updates |
+| Home and agents home | Actual host locations; dedicated directories during acceptance |
+| Working directory | Selected existing absolute workspace |
+| `MCP_REMOTE_CONFIG_DIR` | Fotor-only external directory, separate from model credentials; retain across updates and source changes |
+| Callback | One available port; example `3335`, host copied unchanged from `configuration.example.yml`; identical for client and proxy |
+| Endpoint/resource | Both `https://mcp.fotor.com/mcp`; retain production and OAuth security parameters |
+
+Overrides replace whole `config` objects, not individual nested fields. Retain both complete rows and all arguments. Keep native reconnect disabled. Do not copy credentials into the package, command arguments or documentation.
+
+**Done when:** the full override is external, all paths are real and no conflicting `fotor` service or duplicate provider exists.
 
 ## 5. Apply complete configuration and load skills
 
-Copy the example outside the installed directory. Keep an existing override unchanged until its ownership and intended settings are understood.
+Use the selected profile's native patch mechanism or an explicit external patch:
 
 ```bash
-cp -n "$FOTOR_INSTALLED/configuration.example.yml" "$FOTOR_PATCH"
+dsh --profile "$FOTOR_PROFILE" --patch /absolute/path/to/fotor.local.yml
 ```
 
-Edit that external YAML file. Shell variables in this guide are not automatically expanded inside YAML: put the resolved literal values into every field.
+The installed Bundle declares both components disabled. The example enables only skills; its MCP row stays disabled. Keep `includeDefaultRoots: false` and scan only the actual installed Fotor skill directory.
 
-| YAML field | Required value |
-| --- | --- |
-| Skill `dshHome` / `agentsHome` | Effective `DSH_HOME` / `DSH_AGENTS_HOME` for this launch; use the selected client's actual locations. |
-| Skill `customSkillDirs` | One absolute directory: the resolved `FOTOR_INSTALLED` followed by `/skills`. |
-| Skill `providerName`, `includeDefaultRoots`, `watch` | Keep `fotor`, `false`, `false`; scan only this installed package. |
-| MCP `command` | Literal `FOTOR_NODE`. |
-| First MCP `args` entry | Literal `FOTOR_BRIDGE` followed by `/node_modules/mcp-remote/dist/proxy.js`. |
-| MCP URL, transport and resource | Retain the production values from the example. |
-| Callback port and host | Select a free port and retain the example's loopback host. Use exactly the same pair for the standalone client. |
-| MCP `env.MCP_REMOTE_CONFIG_DIR` | Literal `FOTOR_AUTH`; DeepSeek Harness must pass it to the bridge child. |
-| MCP `cwd` | Literal `FOTOR_WORKSPACE`. |
-| Component states | Skills enabled; MCP disabled until step 6 succeeds. Keep reconnect disabled and the supplied timeouts. |
+In the native menu, select `/fotor-connect`; ask it to read its instructions without authorizing or calling MCP. Confirm the resource path and one discovered copy of each actual Fotor skill. Each skill has four local reference documents.
 
-Use the two complete rows as a native overlay. For a new isolated profile with no provider credentials, check composition before launching:
+Use the host's native `read` tool for those files. The Linux Shell sandbox can hide a `/tmp` installation while native reading still works; a failed Shell `ls` is not proof of a broken package. If native reading fails, stop and report the actual path/error rather than searching other installations.
+
+**Done when:** the native provider discovers the package's actual skills and their local references, and MCP is still disabled.
+
+## 6. Authorize then enable the connection
+
+Read [this package's authentication guide](skills/fotor-connect/references/authentication.md) before connecting. Confirm the opener targets the user's daily ordinary browser, preserve its login state, and keep the proxy stopped while the independent authorization client runs.
 
 ```bash
-dsh --profile "$FOTOR_PROFILE" --patch "$FOTOR_PATCH" --dump-config
+MCP_REMOTE_CONFIG_DIR=/absolute/path/to/dsh-home/mcp-auth/fotor "$FOTOR_NODE" "$FOTOR_BRIDGE/dist/client.js" https://mcp.fotor.com/mcp 3335 --host "$FOTOR_CALLBACK_HOST" --transport http-only --resource https://mcp.fotor.com/mcp --auth-timeout 600 --connect-timeout 20 --headers-timeout 20 --body-timeout 20
 ```
 
-In an existing profile, inspect only the Fotor component settings through native controls. A full dump can include unrelated private settings; do not request, paste or commit it. The host's own dump may contain expressions, which are not Fotor configuration or instructions to execute.
+Set `FOTOR_CALLBACK_HOST` to the callback host verified in the configuration example. Run in an interactive terminal that keeps stdin open. After the user selects Continue, require successful connection and actual tool discovery. A callback page or exit code alone is insufficient. Stop the client and callback listener before enabling the MCP row and restarting the profile. Keep the same endpoint, resource, callback and credential directory. Cancel/timeout stops the flow; human waiting is limited to ten minutes.
 
-Launch with the same overlay:
+The bridge owns OAuth; this is not native remote OAuth in DeepSeek Harness. Model login, package installation, skills, Fotor authorization and website login are separate steps.
 
-```bash
-dsh --profile "$FOTOR_PROFILE" --patch "$FOTOR_PATCH"
-```
-
-An alternative is to merge these rows into that profile's external `cordis.patch.yml`, preserving unrelated rows. Choose one loading method and use it on subsequent launches. DeepSeek Harness replaces complete `config` objects; partial field overrides do not deep-merge.
-
-For interactive use, the user configures any model-provider account through DeepSeek Harness's native settings, separately from Fotor OAuth. In Web, select the intended workspace. Use the actual skill menu to select `/fotor-connect`, asking it to explain the connection steps without Fotor OAuth or MCP calls. Check that it reads resources under `FOTOR_INSTALLED`. An installation-only rehearsal can stop at configuration and resource-path checks; it does not establish model-driven skill execution.
-
-**Done when:** the effective configuration has one Fotor provider, its installed skills are discoverable, and the MCP component remains disabled. If the Shell sandbox hides a temporary package path, use DeepSeek Harness's native `read` tool with the skill's supplied base directory; a failed `bash ls` does not prove the package is missing.
-
-## 6. Authorize, then enable the connection
-
-Follow [first authorization](skills/fotor-connect/references/authentication.md#first-authorization). Run its standalone client command using the Node, bridge, Fotor credential directory, endpoint/resource and callback values selected above. Keep stdin open through actual tool discovery. Confirm that the opener uses the user's daily ordinary browser; preserve its website login and browser data. If its routing is unclear, resolve it before starting authorization instead of changing the system browser default.
-
-The user completes login/consent and chooses Continue, Wait or Cancel. After Continue, require client-confirmed connection and actual tool discovery. Then stop the standalone client and verify its callback listener has closed. Change only the external override's `fotor-mcp.disabled` to `false` and restart DeepSeek Harness with the same overlay. Do not run authorization client and proxy concurrently.
-
-**Done when:** DeepSeek Harness exposes the configured Fotor tools and a real read-only model query succeeds. Installation, a browser success page, or an exit code alone does not establish this.
+**Done when:** authorization-client discovery completes, that client/listener exits, and the enabled native stdio connection discovers actual Fotor tools.
 
 ## 7. Use, update or remove Fotor
 
-### First requests
+Example requests:
 
-| Intent | Example request |
-| --- | --- |
-| MCP only | “Use existing Fotor authorization to query image models. Do not authorize again or open a website; stop if authorization is needed.” |
-| Website connection | “Connect to Fotor and introduce its main features. Use my confirmed daily browser and preserve its existing login state.” |
-| Explicit skill | Select `/fotor-connect` from the actual skill menu, then give the intended request. |
-| Other capabilities | Use the [package README](README.md) and the selected skill's workflow. A capability listing does not perform media operations. |
+- MCP-only: “Connect only to Fotor MCP and list image models. Do not open the website.”
+- Website: “Connect to Fotor and introduce its capabilities.” Prepare the daily browser before requesting the one-use handoff; report website success only after user confirmation.
+- Explicit skill: select `/fotor-image` and describe a task. Every successful `submit_*_task` may consume credits; preserve the existing authorization and retry rules.
 
-For website access, prepare the confirmed browser/profile before requesting a link. Follow [website access](skills/fotor-connect/references/authentication.md#website-access): open the original production handoff once, use native single-command approval if required, and wait for the user's actual page/login result. Manual opening is a separate fallback. An already signed-in page does not prove a new login.
-
-### Update or change source
+Update the selected source, then repeat path and resource verification in a new process:
 
 ```bash
-dsh plugin --profile "$FOTOR_PROFILE" update fotor --ignore-scripts
-dsh plugin --profile "$FOTOR_PROFILE" why fotor
-FOTOR_INSTALLED="$(realpath "$(dsh plugin --profile "$FOTOR_PROFILE" root)/fotor")"
+# Recorded Git source only.
+dsh plugin --profile "$FOTOR_PROFILE" update @fotor-ai/dsh-fotor-plugin --ignore-scripts
+# Recorded npm test source: explicitly select its channel.
+dsh plugin --profile "$FOTOR_PROFILE" update @fotor-ai/dsh-fotor-plugin@next --ignore-scripts
+# Recorded npm production source: explicitly select its channel.
+dsh plugin --profile "$FOTOR_PROFILE" update @fotor-ai/dsh-fotor-plugin@latest --ignore-scripts
+dsh plugin --profile "$FOTOR_PROFILE" why @fotor-ai/dsh-fotor-plugin
 ```
 
-Pass the same explicit `--store-dir` if one was selected at installation. Check the new source revision, version and installed files, refresh `customSkillDirs` if the resolved directory changed, and start a new DeepSeek Harness process. The bridge version, external authorization store and security arguments remain unchanged.
+Choose one update command for the recorded source. The accepted host/package-manager baseline saves npm additions as exact versions: an unqualified update can remain on that exact version even after the tag moves. Explicitly select the intended npm tag or approved exact target; do not apply npm tag selectors to Git installations. A failed native update is not a pass after reinstalling. Stop Fotor components before updating paths; preserve the external credential store, model settings and security parameters.
 
-If the native update does not advance, keep that result and use native removal/addition only as a separately identified reinstall. An existing multi-platform subdirectory installation requires a one-way migration to the independent repository; an ordinary update does not migrate it. Record the original source, profile, package-manager store, installed path and external configuration. Stop both Fotor components, remove only their override rows and natively remove the old Bundle with the command below. Add the independent source in the same profile/store, resolve the new path and restore one complete configuration using its absolute skill directory. Keep exactly one `fotor` source and component pair. Preserve the external bridge, credential directory, model configuration and all connection/security parameters. Later updates follow the independent source; the old subdirectory is not a continuing update channel. Preserve unrelated configuration and browser state.
+### Migrate from the legacy package or switch sources
 
-### Remove
-
-Stop the Fotor proxy, disable both components and remove only their external override rows before native removal:
+Legacy 0.5.1 and older packages are named `fotor`. A normal update does not rename them. Record source/profile/store/path and the external configuration, stop both components, and remove only their override rows. Remove the old identity, then install one scoped source from step 2:
 
 ```bash
 dsh plugin --profile "$FOTOR_PROFILE" remove fotor --config.ignore-scripts=true
 ```
 
-Use the original profile and store. This baseline's `remove` rejects `--ignore-scripts`; use the form above. Preserve the external bridge and Fotor credential directory for later reuse unless their deletion is explicitly requested. Local deletion does not revoke server-side consent. Daily website login remains unchanged.
+For GitHub/npm switching or scoped-package removal, use:
 
-Verify that the profile no longer registers Fotor as a dependency or Bundle and that its effective configuration has neither Fotor component. Directory installation can use a link to the source directory. In the installation rehearsal with pnpm `11.28.5`, native removal removed registration but left that unused link; native `unlink fotor` reported “Nothing to unlink.” Report such residue separately, preserve the original source directory, and do not claim all installed filesystem entries were removed. A dedicated rehearsal directory can be deleted during its scoped cleanup.
+```bash
+dsh plugin --profile "$FOTOR_PROFILE" remove @fotor-ai/dsh-fotor-plugin --config.ignore-scripts=true
+```
 
-## Troubleshooting and evidence boundaries
+This host baseline rejects `--ignore-scripts` on removal; use the configuration form above. After adding the new source, resolve package and managed bridge paths again and restore a complete override. Keep one scoped installation and one component pair. Keep the credential directory, model settings and all connection/security parameters unchanged. Do not automatically delete the old external bridge directory or claim real credential reuse from an offline migration rehearsal.
 
-| Observation | Next action |
-| --- | --- |
-| Bridge missing or wrong version | Return to step 3; inspect the selected external directory. Package installation cannot install it implicitly. |
-| Skills missing / wrong base directory | Resolve the installed package again, inspect the effective full override and use native `read`. Keep one Fotor provider. |
-| `ERR_PNPM_UNEXPECTED_STORE` | Reuse the store selected on the original native installation; do not recreate the cache or change global settings. |
-| Generic Git-package message asks to enable a build script | Inspect the actual failure. Fotor has no build/lifecycle script; do not enable unrelated builds to hide a source, permission or store error. |
-| `needsAuth`, `discoveryState` error or “Start a new authorization flow” | Stop the failed call and use [controlled recovery](skills/fotor-connect/references/authentication.md#bounded-recovery-and-controlled-reauthorization). Preserve the store and security arguments. |
-| Browser command blocked | Request the host's approval for that one opener command, or provide the unused handoff for manual opening in the confirmed browser. |
-| Website link expired | Follow the bounded recovery in the authentication reference; do not reopen a consumed link. |
+### Troubleshooting
 
-Report package installation, skills, bridge authorization, actual MCP calls, website login, restart reuse and controlled recovery separately. Full DeepSeek Harness support remains pending real successful controlled-reauthorization recovery. Following this guide does not erase that gate or establish expiry refresh, Desktop, headless, ACP or media acceptance.
+- Missing bridge: inspect native install/download results and this package's dependency tree; finish installation before connecting.
+- Changed installation path: re-query the native root/dependency paths and replace complete override rows.
+- pnpm store mismatch: use the original profile/store; do not edit caches or move package-manager links manually.
+- Duplicate skills/components: inspect selected sources and override rows before enabling either component.
+- Authorization failure: follow the authentication guide's single-client bounded recovery sequence. Installation or restart success does not prove recovery from rejected credentials.
+
+Uninstalling the Bundle does not revoke server-side consent. Delete only explicitly authorized temporary state after its processes stop; retain daily client configuration, credentials and browser login.
