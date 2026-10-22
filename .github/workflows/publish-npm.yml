@@ -1,0 +1,89 @@
+name: Publish Fotor to npm
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Exact committed package version
+        required: true
+        type: string
+      channel:
+        description: next from release/test; latest from tagged main
+        required: true
+        type: choice
+        options:
+          - next
+          - latest
+permissions:
+  contents: read
+concurrency:
+  group: fotor-npm-publication
+  cancel-in-progress: false
+env:
+  VERSION: ${{ inputs.version }}
+  CHANNEL: ${{ inputs.channel }}
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version: 24.17.0
+          package-manager-cache: false
+      - name: Pin npm
+        run: npm install --global npm@11.21.1 --ignore-scripts --no-audit --no-fund
+      - name: Verify publication selection
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: node .github/scripts/release-gate.mjs preflight "$VERSION" "$CHANNEL"
+      - name: Build and verify a locked npm artifact
+        run: |
+          mkdir "$RUNNER_TEMP/fotor-snapshot"
+          git archive "$GITHUB_SHA" | tar -x -C "$RUNNER_TEMP/fotor-snapshot"
+          node .github/scripts/pack-npm.mjs --input "$RUNNER_TEMP/fotor-snapshot" --output "$RUNNER_TEMP/npm-output" --report "$RUNNER_TEMP/npm-report.json"
+          mkdir "$RUNNER_TEMP/npm-artifact"
+          cp "$RUNNER_TEMP/npm-output/"*.tgz "$RUNNER_TEMP/npm-artifact/"
+          cp "$RUNNER_TEMP/npm-report.json" "$RUNNER_TEMP/npm-artifact/"
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: fotor-npm
+          path: ${{ runner.temp }}/npm-artifact/
+          if-no-files-found: error
+          retention-days: 7
+  publish:
+    needs: build
+    runs-on: ubuntu-24.04
+    environment: npm-publish
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version: 24.17.0
+          registry-url: https://registry.npmjs.org/
+          package-manager-cache: false
+      - run: npm install --global npm@11.21.1 --ignore-scripts --no-audit --no-fund
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          name: fotor-npm
+          path: ${{ runner.temp }}/npm-artifact
+      - name: Recheck source, version availability and artifact
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: node .github/scripts/release-gate.mjs preflight "$VERSION" "$CHANNEL" "$RUNNER_TEMP/npm-artifact"
+      - name: Publish the verified tarball with OIDC
+        run: npm publish "$RUNNER_TEMP/npm-artifact/"*.tgz --access public --tag "$CHANNEL" --provenance --ignore-scripts
+      - name: Verify registry content, channel and provenance
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: node .github/scripts/release-gate.mjs published "$VERSION" "$CHANNEL" "$RUNNER_TEMP/npm-artifact"
