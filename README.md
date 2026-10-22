@@ -5,7 +5,7 @@
 <p align="center"><img src="assets/logo.svg" width="72" alt="Fotor logo" /></p>
 
 <p align="center">
-  <img src="https://img.shields.io/static/v1?label=version&amp;message=0.6.0-test.2&amp;color=087f8c&amp;style=flat-square" alt="Version" />
+  <img src="https://img.shields.io/static/v1?label=version&amp;message=0.6.0-test.3&amp;color=087f8c&amp;style=flat-square" alt="Version" />
   <img src="https://img.shields.io/static/v1?label=channel&amp;message=test&amp;color=a56800&amp;style=flat-square" alt="Release channel" />
   <a href="LICENSE"><img src="https://img.shields.io/static/v1?label=license&amp;message=Apache-2.0&amp;color=57606a&amp;style=flat-square" alt="Apache-2.0 license" /></a>
 </p>
@@ -18,7 +18,7 @@ Use Fotor's shared skills with DeepSeek Harness Web and an automatically install
 | Field | Value |
 | --- | --- |
 | Bundle | `@fotor-ai/dsh-fotor-plugin` |
-| Version | `0.6.0-test.2` |
+| Version | `0.6.0-test.3` |
 | Release channel | `test` |
 | Service environment | `production` |
 | MCP endpoint | `https://mcp.fotor.com/mcp` |
@@ -54,7 +54,7 @@ dsh plugin --profile web add "git+https://github.com/fotor-ai/dsh-fotor-plugin.g
 
 This is the standalone root Bundle for [https://github.com/fotor-ai/dsh-fotor-plugin](https://github.com/fotor-ai/dsh-fotor-plugin). Use its root Git source only after the selected channel contains this version. The [multi-platform repository](https://github.com/fotor-ai/fotor-agent-plugins) documents this external source; it no longer distributes new DeepSeek Harness packages. Existing subdirectory installations require a one-way native source migration.
 
-The Bundle identity is `@fotor-ai/dsh-fotor-plugin`. After the corresponding npm channel is published, its alternative is `dsh plugin --profile web add "@fotor-ai/dsh-fotor-plugin" --ignore-scripts` (production) or `dsh plugin --profile web add "@fotor-ai/dsh-fotor-plugin@next" --ignore-scripts` (test). Select one source only.
+The Bundle identity is `@fotor-ai/dsh-fotor-plugin`. After the corresponding npm channel is published, its alternative is `dsh plugin --profile web add "@fotor-ai/dsh-fotor-plugin" --ignore-scripts` (production) or `dsh plugin --profile web add "@fotor-ai/dsh-fotor-plugin@next" --ignore-scripts` (test). Verify the resolved version and select one source only. Bare-name npm installation follows `latest`; until the formal 0.6.0 rollout, that tag retains the accepted test.1 bootstrap exception and does not mean stable 0.6.0.
 
 Installation automatically obtains **mcp-remote 0.15.1**. Git sources download it through the host package manager; npm artifacts carry its complete locked runtime tree. Fotor skills remain script-free. No installation hook starts the bridge or OAuth, and Node is not bundled.
 
@@ -64,7 +64,7 @@ Follow the [complete installation guide](INSTALL.md):
 2. Install one source with lifecycle scripts disabled.
 3. Query actual package and dependency paths; verify both bridge entrypoints.
 4. Apply full external configuration and enable only skills first.
-5. Complete separate bridge-client authorization before enabling MCP.
+5. Configure the model account separately; complete bridge-client Fotor authorization and actual tool discovery, stop that client, then enable MCP. Website access is a separate request.
 
 The declared host range is `>=0.2.1-rc.2 <0.3.0-0`; matching versions are not automatically verified. Desktop, headless and ACP require separate acceptance.
 
@@ -89,9 +89,15 @@ dsh plugin --profile web update @fotor-ai/dsh-fotor-plugin --ignore-scripts
 dsh plugin --profile web why @fotor-ai/dsh-fotor-plugin
 ```
 
-For a recorded npm source, explicitly select its channel with `dsh plugin --profile web update @fotor-ai/dsh-fotor-plugin@next --ignore-scripts` for test, or `dsh plugin --profile web update @fotor-ai/dsh-fotor-plugin@latest --ignore-scripts` for production. This host may save npm additions as exact versions, so unqualified update can retain the old version. Never apply an npm tag selector to a Git source.
+For a recorded npm source, replace `<target-version>` with the approved, published version:
 
-Verify the source, version, files and actual skill/bridge directories in a new process. Preserve profile/store, credentials and connection parameters. An unsuccessful update remains a failure; reinstall is a separately recorded operation.
+```bash
+dsh plugin --profile web update "@fotor-ai/dsh-fotor-plugin@<target-version>" --ignore-scripts
+```
+
+Immediate `@next` updates retained test.1 during test.2 acceptance; exact-version native updates passed. An unqualified update can also retain the saved version. Neither `@latest` update success nor eventual success after 24 hours is established. Use the [maintenance procedure](INSTALL.md#7-use-update-or-remove-fotor); keep release-age protection and request separate approval for any exact-version exception. Never apply an npm selector to a Git source as an ordinary update.
+
+Verify the source, version, files and actual skill/bridge directories in a new process. Preserve profile/store, credentials and connection parameters. If installation used a custom `--store-dir`, pass that same argument to updates and removal. A zero exit code with the old version is not an upgrade; cache clearing or reinstall does not turn it into a pass.
 
 <a id="dsh-source-selection-and-removal"></a>
 

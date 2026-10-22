@@ -2,7 +2,9 @@
 
 > Requires stable Node 24.2.0 or later within 24.x, or stable Node 26.x. The fixed DeepSeek Harness 0.2.1-rc.2 launcher needs `import.meta.main`, introduced in Node 24.2.0. Earlier Node 24 releases are outside the supported range. Use the release's recorded runtime results for the exact tested versions.
 
-DeepSeek Harness is abbreviated as `dsh` in commands and native identifiers. This guide is self-contained for the independent package. Source 0.6.0 is unpublished: use public commands below only after the selected GitHub or npm channel contains that version. Existing 0.5.1 installations retain their original installation procedure until migrated.
+DeepSeek Harness is abbreviated as `dsh` in commands and native identifiers. This guide is self-contained for the independent 0.6.0 package. Test distributions are available; stable availability is separate. Check the selected GitHub revision or npm version before installing. Existing 0.5.1 installations retain their original guide until migrated to the scoped identity.
+
+During the 0.6.0 test rollout, GitHub's default branch still supplies 0.5.1 and npm `latest` retains the accepted first-publication exception, `0.6.0-test.1`. Bare-name npm installation therefore selects a prerelease until the formal rollout replaces it. Use the GitHub test branch or a verified npm test version during that interval; use production examples only after the selected channel contains the intended stable release.
 
 ## 1. Check prerequisites and select a profile
 
@@ -16,7 +18,7 @@ dsh plugin --profile web root
 
 Git sources additionally require Git. Follow the [host quickstart](https://deepseek-harness.github.io/deepseek-harness/en/guide/quickstart) or [Node downloads](https://nodejs.org/en/download/) for missing prerequisites. Node is not bundled. Preserve daily installations; do not upgrade them to satisfy an acceptance run.
 
-Select one profile, working directory and Fotor-only credential directory outside the installed package. Inspect existing Fotor components before changing anything. A model-provider account is separate from Fotor OAuth.
+Select one profile, working directory and Fotor-only credential directory outside the installed package. Inspect existing Fotor components before changing anything. A model-provider account is separate from Fotor OAuth. If installation uses a custom `--store-dir /absolute/path/to/store`, record it and pass that same argument on later add, update and remove commands. Retain the original profile and source as well.
 
 **Done when:** the host and Node versions are known, the native package manager works, and the profile and external storage locations are selected.
 
@@ -31,7 +33,7 @@ Choose exactly one command after its channel is published:
 dsh plugin --profile web add "git+https://github.com/fotor-ai/dsh-fotor-plugin.git" --ignore-scripts
 # GitHub test channel.
 dsh plugin --profile web add "git+https://github.com/fotor-ai/dsh-fotor-plugin.git#release/test" --ignore-scripts
-# npm production: latest dist-tag.
+# npm production: only after latest is the intended stable release.
 dsh plugin --profile web add "@fotor-ai/dsh-fotor-plugin" --ignore-scripts
 # npm test channel.
 dsh plugin --profile web add "@fotor-ai/dsh-fotor-plugin@next" --ignore-scripts
@@ -136,19 +138,21 @@ Example requests:
 - Website: “Connect to Fotor and introduce its capabilities.” Prepare the daily browser before requesting the one-use handoff; report website success only after user confirmation.
 - Explicit skill: select `/fotor-image` and describe a task. Every successful `submit_*_task` may consume credits; preserve the existing authorization and retry rules.
 
-Update the selected source, then repeat path and resource verification in a new process:
+Stop Fotor components and record their source, profile, store and external configuration before updating. Choose one command for the recorded source. For npm, replace `<target-version>` with an explicitly published and approved version, such as the exact version in the selected release notes:
 
 ```bash
 # Recorded Git source only.
 dsh plugin --profile "$FOTOR_PROFILE" update @fotor-ai/dsh-fotor-plugin --ignore-scripts
-# Recorded npm test source: explicitly select its channel.
-dsh plugin --profile "$FOTOR_PROFILE" update @fotor-ai/dsh-fotor-plugin@next --ignore-scripts
-# Recorded npm production source: explicitly select its channel.
-dsh plugin --profile "$FOTOR_PROFILE" update @fotor-ai/dsh-fotor-plugin@latest --ignore-scripts
+# Recorded npm source: select an exact published target, not a moving tag.
+dsh plugin --profile "$FOTOR_PROFILE" update "@fotor-ai/dsh-fotor-plugin@<target-version>" --ignore-scripts
 dsh plugin --profile "$FOTOR_PROFILE" why @fotor-ai/dsh-fotor-plugin
 ```
 
-Choose one update command for the recorded source. The accepted host/package-manager baseline saves npm additions as exact versions: an unqualified update can remain on that exact version even after the tag moves. Explicitly select the intended npm tag or approved exact target; do not apply npm tag selectors to Git installations. A failed native update is not a pass after reinstalling. Stop Fotor components before updating paths; preserve the external credential store, model settings and security parameters.
+For a custom store, append the original `--store-dir` argument to the selected update command. An unqualified update can remain on the saved npm version. In the recorded test.1-to-test.2 acceptance, immediate `update ...@next` returned success but retained test.1 on both Node 24.2.0 and 26.0.0, even after an approved exception for that exact version's release age. Exact-version native updates passed. The guide therefore uses exact versions for npm updates; this does not establish that `@latest` updates work or that waiting 24 hours always resolves tag updates. Keep Git installations on their recorded Git source: applying an npm version selector is a source change, not a Git update.
+
+Keep the package manager's release-age policy. If it blocks a newly published version, report the target and wait, or obtain separate approval for an exception limited to that exact version and isolated profile. The earlier test.2 approval does not cover later versions. Do not disable the policy globally, clear metadata caches or reinstall to manufacture an update pass.
+
+**Done when:** the installed version and source match the selected target, files and managed bridge are complete, and a new process discovers one copy of each skill at the re-resolved paths. A zero exit code alone is insufficient. Update complete configuration rows if paths moved; preserve the external credential store, model settings and security parameters. Record a failed native update separately from any later reinstall.
 
 ### Migrate from the legacy package or switch sources
 
@@ -164,7 +168,7 @@ For GitHub/npm switching or scoped-package removal, use:
 dsh plugin --profile "$FOTOR_PROFILE" remove @fotor-ai/dsh-fotor-plugin --config.ignore-scripts=true
 ```
 
-This host baseline rejects `--ignore-scripts` on removal; use the configuration form above. After adding the new source, resolve package and managed bridge paths again and restore a complete override. Keep one scoped installation and one component pair. Keep the credential directory, model settings and all connection/security parameters unchanged. Do not automatically delete the old external bridge directory or claim real credential reuse from an offline migration rehearsal.
+This host baseline rejects `--ignore-scripts` on removal; use the configuration form above and append the original `--store-dir` argument when a custom store was used. After adding the new source, resolve package and managed bridge paths again and restore a complete override. Keep one scoped installation and one component pair. Keep the credential directory, model settings and all connection/security parameters unchanged. Do not automatically delete the old external bridge directory or claim real credential reuse from an offline migration rehearsal.
 
 ### Troubleshooting
 
