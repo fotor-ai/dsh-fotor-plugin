@@ -10,7 +10,7 @@ import { gunzipSync } from 'node:zlib';
 
 export const NAME = '@fotor-ai/dsh-fotor-plugin';
 export const REPOSITORY = 'https://github.com/fotor-ai/dsh-fotor-plugin';
-export const GRAPH_SHA256 = 'a08c09092169f231362bc90565dbc601ba08d1f5ca1599a27f7b51429674b4bf';
+export const GRAPH_SHA256 = 'ed36f07e1a69956b927417c02f12b63acac7b0500cdf248203d537ea5d1d603a';
 export const NPM_VERSION = '11.21.1';
 export const NODE_RANGE = '>=24.2.0 <25.0.0 || 26.x';
 const ownFiles = ['cordis.patch.yml', 'configuration.example.yml', 'INSTALL.md',
@@ -65,7 +65,7 @@ export function validateInput(input) {
   assert.match(manifest.version, /^\d+\.\d+\.\d+(?:-test\.[1-9]\d*)?$/);
   assert.equal(manifest.repository, REPOSITORY);
   assert.equal(manifest.private, true);
-  assert.deepEqual(manifest.dependencies, { 'mcp-remote': '0.15.1' });
+  assert.deepEqual(manifest.dependencies, { 'mcp-remote': '0.15.2' });
   assert.deepEqual(manifest.engines, { dsh: '>=0.2.1-rc.2 <0.3.0-0', node: NODE_RANGE });
   assert.deepEqual(manifest.dsh, { bundle: { patch: './cordis.patch.yml' } });
   assert.deepEqual([...manifest.files].sort(), [...ownFiles].sort());
