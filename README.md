@@ -5,7 +5,7 @@
 <p align="center"><img src="assets/logo.svg" width="72" alt="Fotor logo" /></p>
 
 <p align="center">
-  <img src="https://img.shields.io/static/v1?label=version&amp;message=0.6.0-test.3&amp;color=087f8c&amp;style=flat-square" alt="Version" />
+  <img src="https://img.shields.io/static/v1?label=version&amp;message=0.6.0-test.4&amp;color=087f8c&amp;style=flat-square" alt="Version" />
   <img src="https://img.shields.io/static/v1?label=channel&amp;message=test&amp;color=a56800&amp;style=flat-square" alt="Release channel" />
   <a href="LICENSE"><img src="https://img.shields.io/static/v1?label=license&amp;message=Apache-2.0&amp;color=57606a&amp;style=flat-square" alt="Apache-2.0 license" /></a>
 </p>
@@ -18,13 +18,13 @@ Use Fotor's shared skills with DeepSeek Harness Web and an automatically install
 | Field | Value |
 | --- | --- |
 | Bundle | `@fotor-ai/dsh-fotor-plugin` |
-| Version | `0.6.0-test.3` |
+| Version | `0.6.0-test.4` |
 | Release channel | `test` |
 | Service environment | `production` |
 | MCP endpoint | `https://mcp.fotor.com/mcp` |
 | Declared host range | `>=0.2.1-rc.2 <0.3.0-0` |
 | Host baseline | Linux DeepSeek Harness Web 0.2.1-rc.2 |
-| Bridge | mcp-remote 0.15.1 |
+| Bridge | mcp-remote 0.15.2 |
 | Node range | `>=24.2.0 <25.0.0 \|\| 26.x`, stable versions |
 | License | Apache-2.0 |
 
@@ -56,7 +56,7 @@ This is the standalone root Bundle for [https://github.com/fotor-ai/dsh-fotor-pl
 
 The Bundle identity is `@fotor-ai/dsh-fotor-plugin`. After the corresponding npm channel is published, its alternative is `dsh plugin --profile web add "@fotor-ai/dsh-fotor-plugin" --ignore-scripts` (production) or `dsh plugin --profile web add "@fotor-ai/dsh-fotor-plugin@next" --ignore-scripts` (test). Verify the resolved version and select one source only. Bare-name npm installation follows `latest`; until the formal 0.6.0 rollout, that tag retains the accepted test.1 bootstrap exception and does not mean stable 0.6.0.
 
-Installation automatically obtains **mcp-remote 0.15.1**. Git sources download it through the host package manager; npm artifacts carry its complete locked runtime tree. Fotor skills remain script-free. No installation hook starts the bridge or OAuth, and Node is not bundled.
+Installation automatically obtains **mcp-remote 0.15.2**. Git sources download it through the host package manager; npm artifacts carry its complete locked runtime tree. Fotor skills remain script-free. No installation hook starts the bridge or OAuth, and Node is not bundled.
 
 Follow the [complete installation guide](INSTALL.md):
 

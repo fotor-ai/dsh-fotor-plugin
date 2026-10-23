@@ -2,7 +2,7 @@
 
 > Requires stable Node 24.2.0 or later within 24.x, or stable Node 26.x. The fixed DeepSeek Harness 0.2.1-rc.2 launcher needs `import.meta.main`, introduced in Node 24.2.0. Earlier Node 24 releases are outside the supported range. Use the release's recorded runtime results for the exact tested versions.
 
-DeepSeek Harness is abbreviated as `dsh` in commands and native identifiers. This guide is self-contained for the independent 0.6.0 package. Test distributions are available; stable availability is separate. Check the selected GitHub revision or npm version before installing. Existing 0.5.1 installations retain their original guide until migrated to the scoped identity.
+DeepSeek Harness is abbreviated as `dsh` in commands and native identifiers. This guide is self-contained for the independent 0.6.0 package. Test distributions are available; stable availability is separate. This internal refresh pins mcp-remote 0.15.2; published test.3 retains 0.15.1 until a refreshed channel is released. Check the selected GitHub revision or npm version before installing. Existing 0.5.1 installations retain their original guide until migrated to the scoped identity.
 
 During the 0.6.0 test rollout, GitHub's default branch still supplies 0.5.1 and npm `latest` retains the accepted first-publication exception, `0.6.0-test.1`. Bare-name npm installation therefore selects a prerelease until the formal rollout replaces it. Use the GitHub test branch or a verified npm test version during that interval; use production examples only after the selected channel contains the intended stable release.
 
@@ -24,7 +24,7 @@ Select one profile, working directory and Fotor-only credential directory outsid
 
 ## 2. Install one Bundle source
 
-The package name is **`@fotor-ai/dsh-fotor-plugin`** for both sources. Installing it automatically obtains the pinned **mcp-remote 0.15.1** runtime. There is no separate bridge installation command. Git installation downloads the dependency through the host package manager; npm artifacts already carry the bridge and its complete runtime dependency tree. Installation starts neither the bridge nor OAuth.
+The package name is **`@fotor-ai/dsh-fotor-plugin`** for both sources. Installing it automatically obtains the pinned **mcp-remote 0.15.2** runtime. There is no separate bridge installation command. Git installation downloads the dependency through the host package manager; npm artifacts already carry the bridge and its complete runtime dependency tree. Installation starts neither the bridge nor OAuth.
 
 Choose exactly one command after its channel is published:
 
@@ -58,7 +58,7 @@ dsh plugin --profile "$FOTOR_PROFILE" why mcp-remote --json
 
 Choose the resolution route matching the installed manifest:
 
-- **Git source:** the dependency query can return multiple paths. Select the mcp-remote 0.15.1 dependency owned by this exact Fotor installation; stop on ambiguity. pnpm can place it beside the package rather than inside it. Set `FOTOR_BRIDGE` to that verified absolute dependency path.
+- **Git source:** the dependency query can return multiple paths. Select the mcp-remote 0.15.2 dependency owned by this exact Fotor installation; stop on ambiguity. pnpm can place it beside the package rather than inside it. Set `FOTOR_BRIDGE` to that verified absolute dependency path.
 - **npm artifact:** after verifying `bundleDependencies` names mcp-remote, resolve the bundled directory below. The native dependency list may omit bundled packages; an empty list alone is not a missing bridge.
 
 ```bash
@@ -78,7 +78,7 @@ test -f "$FOTOR_BRIDGE/dist/proxy.js"
 
 Git pins the direct bridge version; its transitive graph is resolved by the host and should be recorded when reproducing a result. The packaged lock file is the npm release-build input, not a promise that pnpm honors it during Git installation.
 
-**Done when:** the scoped package/version, bridge 0.15.1, both bridge entrypoints and all selected absolute paths are verified. A `why` result alone does not establish file completeness or the Git commit.
+**Done when:** the scoped package/version, bridge 0.15.2, both bridge entrypoints and all selected absolute paths are verified. A `why` result alone does not establish file completeness or the Git commit.
 
 ## 4. Prepare complete configuration
 

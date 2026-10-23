@@ -1,6 +1,6 @@
 {
   "name": "@fotor-ai/dsh-fotor-plugin",
-  "version": "0.6.0-test.3",
+  "version": "0.6.0-test.4",
   "description": "Connect to Fotor's production MCP service.",
   "author": {
     "name": "Fotor"
@@ -29,6 +29,6 @@
     }
   },
   "dependencies": {
-    "mcp-remote": "0.15.1"
+    "mcp-remote": "0.15.2"
   }
 }

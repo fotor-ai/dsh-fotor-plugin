@@ -8,7 +8,7 @@ DeepSeek Harness is abbreviated as `dsh` in commands and native identifiers.
 
 ## Ownership and baseline
 
-This Bundle targets Linux DeepSeek Harness Web `0.2.1-rc.2`, with package-manager-owned `mcp-remote 0.15.1` and stable Node `>=24.2.0 <25.0.0 || 26.x`. DeepSeek Harness owns the stdio client and tool permissions; the bridge owns OAuth and its credential store. Do not describe this as native remote OAuth in DeepSeek Harness. Desktop, headless and ACP have separate acceptance scopes.
+This Bundle targets Linux DeepSeek Harness Web `0.2.1-rc.2`, with package-manager-owned `mcp-remote 0.15.2` and stable Node `>=24.2.0 <25.0.0 || 26.x`. DeepSeek Harness owns the stdio client and tool permissions; the bridge owns OAuth and its credential store. Do not describe this as native remote OAuth in DeepSeek Harness. Desktop, headless and ACP have separate acceptance scopes.
 
 Use this guide with the [shared runtime workflow](mcp-integration.md#runtime-workflow). Installation, authorization, actual calls, website access, restart reuse and reauthorization recovery are distinct outcomes. Do not infer full support from one successful call.
 
@@ -28,7 +28,7 @@ Use DeepSeek Harness's native `read` tool for the known package references. Its 
 
 ## First authorization
 
-Verify this installed package owns mcp-remote 0.15.1, and resolve its actual client/proxy paths using the installation guide: native dependency queries for Git, or the declared bundled directory for npm. Never download or upgrade it during connection with an unpinned `npx` command. Keep the stdio proxy stopped while the standalone authorization client runs.
+Verify this installed package owns mcp-remote 0.15.2, and resolve its actual client/proxy paths using the installation guide: native dependency queries for Git, or the declared bundled directory for npm. Never download or upgrade it during connection with an unpinned `npx` command. Keep the stdio proxy stopped while the standalone authorization client runs.
 
 Confirm the actual opener in this launch environment uses the user's daily ordinary browser. A task-specific desktop routing override may be needed; do not change the system default, create an incognito or headless session, or clear browser data. The model-provider login is independent of Fotor OAuth.
 
