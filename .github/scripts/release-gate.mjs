@@ -127,7 +127,7 @@ export function verifyArtifact(directory, version) {
   assert.equal(manifest.version, version);
   assert.equal(manifest.repository, REPOSITORY);
   assert(!manifest.private && !manifest.scripts);
-  assert.deepEqual(manifest.dependencies, { 'mcp-remote': '0.15.1' });
+  assert.deepEqual(manifest.dependencies, { 'mcp-remote': '0.15.2' });
   assert.deepEqual(manifest.bundleDependencies, ['mcp-remote']);
   return report;
 }

@@ -29,6 +29,6 @@
     }
   },
   "dependencies": {
-    "mcp-remote": "0.15.1"
+    "mcp-remote": "0.15.2"
   }
 }
