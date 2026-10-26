@@ -1,18 +1,10 @@
-# Installation declares inert host-owned components. Configure before enabling.
+# Host activation resolves local paths; package installation has no lifecycle hook.
 - insert:
     - id: fotor-skills
-      name: '@deepseek-ai/dsh-skill-filesystem'
-      disabled: true
-      config:
-        providerName: fotor
-        includeDefaultRoots: false
-        customSkillDirs: []
+      name: '@fotor-ai/dsh-fotor-plugin/skills'
+      disabled: false
+      config: {}
     - id: fotor-mcp
-      name: '@deepseek-ai/dsh-mcp-client'
-      disabled: true
-      config:
-        serverName: fotor
-        transport: stdio
-        failOnStartupError: false
-        reconnect:
-          enabled: false
+      name: '@fotor-ai/dsh-fotor-plugin/mcp'
+      disabled: false
+      config: {}

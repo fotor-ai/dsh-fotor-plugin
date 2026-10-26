@@ -8,41 +8,29 @@ DeepSeek Harness is abbreviated as `dsh` in commands and native identifiers.
 
 ## Ownership and baseline
 
-This Bundle targets Linux DeepSeek Harness Web `0.2.1-rc.2`, with package-manager-owned `mcp-remote 0.15.2` and stable Node `>=24.2.0 <25.0.0 || 26.x`. DeepSeek Harness owns the stdio client and tool permissions; the bridge owns OAuth and its credential store. Do not describe this as native remote OAuth in DeepSeek Harness. Desktop, headless and ACP have separate acceptance scopes.
+The current acceptance baseline is Linux DeepSeek Harness Web `0.2.1-rc.3`, with package-manager-owned `mcp-remote 0.15.2` and stable Node `>=24.2.0 <25.0.0 || 26.x`. Historical rc.2 results retain their original scope; matching the declared host range alone is not acceptance. DeepSeek Harness owns the stdio client and tool permissions; the bridge owns OAuth and its credential store. Do not describe this as native remote OAuth in DeepSeek Harness. Desktop, headless and ACP have separate acceptance scopes.
 
 Use this guide with the [shared runtime workflow](mcp-integration.md#runtime-workflow). Installation, authorization, actual calls, website access, restart reuse and reauthorization recovery are distinct outcomes. Do not infer full support from one successful call.
 
-## Inspect and configure
+## Installation and automatic configuration
 
-Installation declares two disabled components. The package manager automatically obtains the pinned bridge dependency. Installation does not register a working connection, scan unconfigured skill roots or start OAuth. For first installation, a missing bridge, unconfigured paths or missing skills, open the installed package's README and follow its `INSTALL.md` guide before continuing. That guide covers GitHub/npm installation, native dependency-path queries and complete configuration; no internal development document is required. The user or an Agent acting on their installation request completes those steps before connection.
+For installation, source changes, missing dependencies, or invalid saved paths, read the installed package README and `INSTALL.md`. GitHub installation obtains the pinned bridge through the package manager; npm carries its full dependency tree. Node remains external.
 
-For an update or source change, read the same guide's maintenance section before changing the installation. npm updates use an explicit published target version; preserve the original profile/store and verify actual installed files before declaring success. Immediate tag updates have a recorded limitation. Updating paths is distinct from authorizing Fotor or opening its website; preserve the existing external credential directory.
+From 0.6.1, select the installed Bundle with Web **Enable now** or load its CLI profile. Host activation enables both adapters by default. `fotor-skills` resolves this package's skills and uses the native filesystem provider without default-root scanning. `fotor-mcp` resolves Node and both installed bridge entrypoints, then supplies complete native stdio configuration. Runtime defaults are not written into a user patch. A package download alone runs no hook or authorization.
 
-Copy `configuration.example.yml` outside the package. Inspect the effective profile, home patch and launch overlays before changing them. Stop on a conflicting `fotor` service or duplicate skill provider; preserve the existing configuration.
+Explicit profile/home/launch overrides, including disabled states and the external `MCP_REMOTE_CONFIG_DIR`, take precedence. Do not replace them or clear credentials to repair a path error. An obsolete path requires a targeted native configuration edit: remove only that override to adopt automatic resolution, or correct it. Conflicting Fotor services or skill providers require resolving the duplicate while preserving the existing installation.
 
-Fill every path with its actual absolute location. Only the installed Fotor skill directory belongs in `customSkillDirs`; retain `includeDefaultRoots: false`. Use the independent Fotor provider name. Configure the external Node executable, bridge proxy, working directory and Fotor-only `MCP_REMOTE_CONFIG_DIR`. Keep the bridge store separate from model-provider credentials and other clients. Preserve it across package updates. Overrides replace the entire `config` object, including security and reconnect settings; they do not deep-merge individual fields.
-
-Enable only the skill provider first. Use `/fotor-connect` when exposed by the native skill menu, or the native `skill` tool for the actual discovered Fotor connection entry. Confirm its installed resource path. Missing skills, a missing executable, a disabled component, permission denial, unauthenticated MCP and unknown state require different responses; none justifies clearing credentials.
-
-Use DeepSeek Harness's native `read` tool for the known package references. Its Linux shell sandbox can hide other host files under a private temporary-directory mount; shell `ls` failure is not proof that native file reading will fail. If the native reader cannot access this package, report that limit and stop. Do not scan unrelated installations, use another platform's guide, or widen standing sandbox permissions to work around the lookup.
+Use native `root`, `list` and `why` for diagnostics; do not guess pnpm store paths. The skill provider's running state alone is not discovery: verify the actual Fotor entries and their installed resource paths. Use native `read` for skill references; the Linux Shell sandbox can hide host paths. Do not scan unrelated packages after a native read failure.
 
 ## First authorization
 
-Verify this installed package owns mcp-remote 0.15.2, and resolve its actual client/proxy paths using the installation guide: native dependency queries for Git, or the declared bundled directory for npm. Never download or upgrade it during connection with an unpinned `npx` command. Keep the stdio proxy stopped while the standalone authorization client runs.
+Enabling MCP starts one cancellable connection task. The adapter runs the installed mcp-remote client with the same credential directory, endpoint, resource, callback and security arguments as the proxy. The bridge reuses valid credentials or opens the ordinary browser for user login and consent. Fotor code does not read tokens, implement OAuth, or install dependencies during connection. Model-provider login is separate.
 
-Confirm the actual opener in this launch environment uses the user's daily ordinary browser. A task-specific desktop routing override may be needed; do not change the system default, create an incognito or headless session, or clear browser data. The model-provider login is independent of Fotor OAuth.
+Confirm the opener uses the user's daily ordinary browser; retain its profile and login state. A task-specific routing override may be used without changing the system default; record it separately from untouched default-browser behavior. Human authorization still belongs to the user, including Continue / Wait / Cancel. The adapter's states and sanitized diagnostics distinguish `preparing`, `waiting-authorization`, `connected`, `failed` and `stopped`; an active adapter is not proof of a connected MCP service.
 
-Run the installed dependency's native client entrypoint, using the same endpoint, resource, callback port/host and credential directory configured for the proxy:
+After Continue, require successful client connection and actual tools discovery. The client and callback listener must exit before the native MCP client starts the proxy. Proxy tool discovery completes readiness; a consent success page or zero client exit alone is insufficient. Authorization waits at most ten minutes. Cancel by disabling `fotor-mcp` through the native plugin controls; the owned child and callback must stop without blocking the Web interface. A cancelled or failed task waits for a deliberate disable/enable before another authorization attempt.
 
-Use a native interactive terminal, or a host execution facility that keeps the client's input channel open until discovery completes. Closing stdin can make the bridge exit successfully before its tools response arrives; require actual discovery and completion rather than exit code alone.
-
-```bash
-MCP_REMOTE_CONFIG_DIR=/absolute/path/to/dsh-home/mcp-auth/fotor /absolute/path/to/node /absolute/path/from/dependency-query/mcp-remote/dist/client.js https://mcp.fotor.com/mcp <callback-port> --host <callback-host> --transport http-only --resource https://mcp.fotor.com/mcp --auth-timeout 600 --connect-timeout 20 --headers-timeout 20 --body-timeout 20
-```
-
-The user completes account login, consent and Continue / Wait / Cancel in conversation. After Continue, verify the actual client connected, discovered tools and finished successfully; a browser success page alone is insufficient. Limit human OAuth waiting to ten minutes and stop this client's callback listener on cancellation or timeout. Do not assume a command-line timeout enforces every callback wait.
-
-After the standalone client exits and its callback listener closes, enable the configured MCP component and restart the selected DeepSeek Harness profile. Discover actual tools and execute a read-only `list_models` check. Do not expose the whole model catalog, query credits or request a website link for an MCP-only task.
+After connection, use `/fotor-connect` or the native skill tool for the actual discovered entry. Verify with a read-only `list_models` call when requested. MCP-only requests neither request a website link nor query credits. Installation, authorization, discovery and actual queries are distinct evidence.
 
 ## Website access
 
@@ -64,13 +52,17 @@ For user-requested reauthorization, use this single sequence:
 
 1. Stop the failed operation, this profile's proxy and any leftover callback listener. Do not start a competing authorization flow.
 2. Preserve the same credential directory and connection/security arguments. Do not read, copy or edit tokens.
-3. Run the standalone authorization client above. Complete the new native consent flow only when explicitly requested, with the same Continue / Wait / Cancel handling and native-result verification.
+3. Re-enable the MCP adapter after the user requests another connection attempt. It runs the standalone authorization client and applies the same Continue / Wait / Cancel handling and native-result verification.
 4. Stop the standalone client, restart the configured DeepSeek Harness MCP and prove recovery with an actual read-only query. A successful consent page without that query is not recovery.
 
-A cached client connection without a new consent flow is reuse, not invalid-grant recovery. Never clear a global authorization directory, substitute a new empty store, weaken issuer/resource/PKCE/TLS checks or sign out the daily website to force a test. Exercise recovery only after a real failure or an available native operation that can be limited to this exact temporary grant. If no safe trigger exists, report recovery as unverified rather than claiming complete acceptance. Expiry-driven refresh likewise requires actual evidence.
+A cached client connection without a new consent flow is reuse, not invalid-grant recovery. Never clear a global authorization directory, substitute a new empty store, weaken issuer/resource/PKCE/TLS checks or sign out the daily website to force a test. Server-side invalid-grant acceptance requires a real failure or an available native operation limited to this exact temporary grant. If no safe trigger exists, report that recovery scope as unverified. Expiry-driven refresh likewise requires actual evidence.
+
+An explicitly user-approved isolated local-cache-loss test is a separate acceptance scope. After stopping all task-owned processes and callbacks, verify ownership and ordinary-file type before removing only that connection's token cache, without reading its contents. Keep the original directory, registration and connection parameters. Re-enable the adapter for user consent, then require an actual query and another query after a full restart. Label this local credential-loss recovery; it does not establish server-side revocation, expiry or intact rejected-cache recovery.
 
 ## Updating and removing
 
 Use the native Bundle commands in the package README. After updating, inspect the resolved source, version, file contents and actual skill directory; package-manager links outside the package are distinct from forbidden symlinks inside its resources. Keep only one enabled Fotor skill source. Re-resolve the managed bridge path when replacing a package; preserve the external credential store.
 
-Disable only this Bundle's two components and remove its local overrides before native removal. Cleanup of an isolated acceptance environment may delete that environment's local store after all related processes stop; that does not revoke server-side consent. Leave daily installations, credentials and browser login unchanged. Keep package, model-session, bridge, website, reuse and recovery evidence separate.
+Disable this Bundle before native removal. Retain its external overrides and credentials unless the user explicitly requests a targeted removal. Cleanup of an isolated acceptance environment may delete that environment's local store after all related processes stop; that does not revoke server-side consent. Leave daily installations, credentials and browser login unchanged. Keep package, model-session, bridge, website, reuse and recovery evidence separate.
+
+Reinstalling the same source/profile with the same credential directory can reuse accepted authorization. It still establishes a new connection, so verify actual discovery and a requested read-only query. Changing profile, home, credential directory or connection parameters can select another cache. Preserve explicit disabled settings and valid complete configuration when upgrading; correct only obsolete path overrides through native configuration.

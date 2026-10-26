@@ -14,7 +14,8 @@ export const GRAPH_SHA256 = 'ed36f07e1a69956b927417c02f12b63acac7b0500cdf248203d
 export const NPM_VERSION = '11.21.1';
 export const NODE_RANGE = '>=24.2.0 <25.0.0 || 26.x';
 const ownFiles = ['cordis.patch.yml', 'configuration.example.yml', 'INSTALL.md',
-  'skills', 'assets', 'README.md', 'LICENSE'];
+  'skills', 'assets', 'README.md', 'LICENSE', 'runtime'];
+const runtimeFiles = ['runtime/config.mjs', 'runtime/client.mjs', 'runtime/lifecycle.mjs', 'runtime/skills.mjs', 'runtime/mcp.mjs', 'runtime/lease.mjs'];
 const refNames = ['authentication.md', 'credits.md', 'mcp-integration.md', 'media-upload.md'];
 const json = p => JSON.parse(fs.readFileSync(p, 'utf8'));
 export const sha256 = data => createHash('sha256').update(data).digest('hex');
@@ -70,7 +71,9 @@ export function validateInput(input) {
   assert.deepEqual(manifest.dsh, { bundle: { patch: './cordis.patch.yml' } });
   assert.deepEqual([...manifest.files].sort(), [...ownFiles].sort());
   const allowed = ['name', 'version', 'description', 'author', 'homepage', 'repository',
-    'license', 'private', 'engines', 'icon', 'files', 'dsh', 'dependencies'];
+    'license', 'private', 'engines', 'icon', 'files', 'dsh', 'dependencies', 'type', 'exports'];
+  assert.equal(manifest.type, 'module');
+  assert.deepEqual(manifest.exports, { './skills': './runtime/skills.mjs', './mcp': './runtime/mcp.mjs' });
   assert(Object.keys(manifest).every(key => allowed.includes(key)), 'Unexpected manifest field');
   assert.equal(lock.lockfileVersion, 3);
   assert.equal(lock.name, manifest.name);
@@ -91,11 +94,11 @@ export function validateInput(input) {
     assert.equal(item.mode, 0o644, 'Unexpected owned file mode: ' + item.path);
     if (top !== '.github') {
       assert(!item.path.split('/').includes('node_modules'), 'Dependencies in Git snapshot');
-      assert(!/\.(?:m?[jt]s|cjs|py|sh|exe|dll)$/i.test(item.path), 'Executable owned resource');
+      assert(runtimeFiles.includes(item.path) || !/\.(?:m?[jt]s|cjs|py|sh|exe|dll)$/i.test(item.path), 'Executable owned resource');
     }
   }
   for (const name of ['package.json', 'package-lock.json', 'cordis.patch.yml',
-    'configuration.example.yml', 'INSTALL.md', 'README.md', 'LICENSE', 'assets/logo.svg']) {
+    'configuration.example.yml', 'INSTALL.md', 'README.md', 'LICENSE', 'assets/logo.svg', ...runtimeFiles]) {
     assert(files.some(item => item.path === name), 'Missing snapshot file: ' + name);
   }
   const skills = files.filter(item => /^skills\/[^/]+\/SKILL\.md$/.test(item.path));
