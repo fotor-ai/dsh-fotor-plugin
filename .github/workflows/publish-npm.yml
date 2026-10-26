@@ -22,7 +22,7 @@ env:
   VERSION: ${{ inputs.version }}
   CHANNEL: ${{ inputs.channel }}
   # Approved first-publication exception. Change only through a reviewed release decision.
-  EXPECTED_LATEST: 0.6.0-test.1
+  EXPECTED_LATEST: 0.6.0
 jobs:
   build:
     runs-on: ubuntu-24.04

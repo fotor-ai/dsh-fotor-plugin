@@ -1,6 +1,6 @@
 {
   "name": "@fotor-ai/dsh-fotor-plugin",
-  "version": "0.6.0-test.4",
+  "version": "0.6.1-test.1",
   "description": "Connect to Fotor's production MCP service.",
   "author": {
     "name": "Fotor"
@@ -21,7 +21,8 @@
     "skills",
     "assets",
     "README.md",
-    "LICENSE"
+    "LICENSE",
+    "runtime"
   ],
   "dsh": {
     "bundle": {
@@ -30,5 +31,10 @@
   },
   "dependencies": {
     "mcp-remote": "0.15.2"
+  },
+  "type": "module",
+  "exports": {
+    "./skills": "./runtime/skills.mjs",
+    "./mcp": "./runtime/mcp.mjs"
   }
 }

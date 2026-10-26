@@ -1,5 +1,6 @@
-# Copy outside the installed package and fill every absolute path.
-# Select a free callback port; use the same connection arguments for the client.
+# Optional legacy full override. New installations need no path configuration.
+# Copy outside the package only when intentionally overriding automatic values.
+# The adapter runs its client with the same connection arguments before the proxy.
 # Overrides replace the complete config object; fields are not deep-merged.
 - id: fotor-skills
   disabled: false
