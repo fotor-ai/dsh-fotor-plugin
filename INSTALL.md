@@ -1,6 +1,6 @@
 # Install and use Fotor with DeepSeek Harness
 
-DeepSeek Harness is abbreviated as `dsh` in commands and native identifiers. This guide describes automatic configuration in Fotor 0.6.1. Version 0.6.0 uses its documented manual configuration. Read the package README's version and channel, and choose a source that actually contains the target version. A candidate snapshot does not publish the npm package or change either default branch.
+DeepSeek Harness is abbreviated as `dsh` in commands and native identifiers. This guide describes automatic configuration introduced in Fotor 0.6.1. Version 0.6.0 uses its documented manual configuration. Read the package README's version and channel, and choose a source that actually contains the target version. A candidate snapshot does not publish the npm package or change either default branch.
 
 ## 1. Check prerequisites
 
@@ -52,6 +52,12 @@ The package declares both adapters enabled. A saved explicit disabled override s
 The adapter creates complete native `command`, `args`, `env` and `cwd` values in memory. Credentials default to `<active-profile-directory>/fotor/mcp-auth`, outside the installation. The default callback is loopback port 3335. A conflicting listener produces a diagnosis; stop the conflicting task or configure an unused port without changing an existing authorization's parameters casually.
 
 Optional MCP settings include `endpoint` (production Fotor by default; a loopback service is for isolated acceptance), `callbackPort`, and existing native stdio fields. A supplied `args` array is complete, not an append. Explicit `env.MCP_REMOTE_CONFIG_DIR` is preserved. The [full legacy configuration example](configuration.example.yml) remains available for advanced overrides; it is never auto-applied. Overrides replace the complete `config` object, not a deep merge.
+
+### Tool call timeouts
+
+The native `fotor-mcp` component defaults to `toolCallTimeoutMs: 300000` (a total deadline in milliseconds). The generated bridge arguments use 300 seconds for response headers and body inactivity; the connection timeout stays 20 seconds. Startup recovery and the ten-minute authorization wait are separate limits.
+
+To change the host deadline, set `toolCallTimeoutMs` in the component's native configuration. A saved complete `args` override retains its own bridge limits. Inspect both layers if a call ends early; edit or remove only the intended overrides through the same profile. No credential change is needed. A response near the upstream deadline can still be lost: keep any known task ID and never automatically repeat a submission.
 
 ## 5. Verify skills and existing overrides
 

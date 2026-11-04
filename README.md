@@ -5,7 +5,7 @@
 <p align="center"><img src="assets/logo.svg" width="72" alt="Fotor logo" /></p>
 
 <p align="center">
-  <img src="https://img.shields.io/static/v1?label=version&amp;message=0.6.1&amp;color=087f8c&amp;style=flat-square" alt="Version" />
+  <img src="https://img.shields.io/static/v1?label=version&amp;message=0.8.0&amp;color=087f8c&amp;style=flat-square" alt="Version" />
   <img src="https://img.shields.io/static/v1?label=channel&amp;message=production&amp;color=238636&amp;style=flat-square" alt="Release channel" />
   <a href="LICENSE"><img src="https://img.shields.io/static/v1?label=license&amp;message=Apache-2.0&amp;color=57606a&amp;style=flat-square" alt="Apache-2.0 license" /></a>
 </p>
@@ -13,12 +13,12 @@
   <a href="#dsh"><img src="https://img.shields.io/static/v1?label=agent&amp;message=DeepSeek+Harness&amp;color=24292f&amp;style=flat-square" alt="DeepSeek Harness" /></a>
 </p>
 
-Use Fotor's shared skills with DeepSeek Harness Web and an automatically installed MCP bridge dependency.
+Create images, video and audio with Fotor through DeepSeek Harness Web and an automatically installed MCP bridge dependency.
 
 | Field | Value |
 | --- | --- |
 | Bundle | `@fotor-ai/dsh-fotor-plugin` |
-| Version | `0.6.1` |
+| Version | `0.8.0` |
 | Release channel | `production` |
 | Service environment | `production` |
 | MCP endpoint | `https://mcp.fotor.com/mcp` |
@@ -128,7 +128,7 @@ Uninstall retains external credentials but does not revoke server consent. Same-
 
 ## Workflows
 
-Start with [connection and model discovery](skills/fotor-connect/references/mcp-integration.md#runtime-workflow), then select the skill matching the request. Follow [media preparation](skills/fotor-connect/references/media-upload.md) for local references and [credits](skills/fotor-connect/references/credits.md) for balance/pricing requests. These instructions do not establish host acceptance of every media operation.
+Start with [connection and model discovery](skills/fotor-connect/references/mcp-integration.md#runtime-workflow), then select the skill matching the request. Follow [media preparation](skills/fotor-connect/references/media-upload.md) for local references and [credits](skills/fotor-connect/references/credits.md) to query your own Fotor credit balance. These instructions do not establish host acceptance of every media operation.
 
 ## Bundle contents
 
@@ -147,5 +147,7 @@ Start with [connection and model discovery](skills/fotor-connect/references/mcp-
 [Apache-2.0](LICENSE)
 
 ## Skill-local references
+
+Audio workflows cover soundtrack composition, new tracks, song editing, speech, podcasts and vocal separation. Consult the installed audio skill when available. The host deadline and generated bridge header/body timeouts default to 300 seconds. See [tool call timeouts](INSTALL.md#tool-call-timeouts) for scopes and overrides. A deadline is not confirmation that a task failed; preserve any known ID without automatic resubmission.
 
 Every packaged skill carries four generated documents in its own `references/` directory, including this platform's authentication guide. Read them as needed; complete runtime documentation does not install or configure MCP.
