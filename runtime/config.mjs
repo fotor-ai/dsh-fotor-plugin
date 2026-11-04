@@ -11,6 +11,7 @@ export const PACKAGE_ROOT = fileURLToPath(new URL('../', import.meta.url));
 export const ENDPOINT = 'https://mcp.fotor.com/mcp';
 export const CALLBACK_HOST = '127.0.0.1';
 const execute = promisify(execFile);
+const CALL_TIMEOUT_SECONDS = 300;
 export function supportedNode(version) {
   const match = /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)$/.exec(version);
   return !!match && ((Number(match[1]) === 24 && Number(match[2]) >= 2) || Number(match[1]) === 26);
@@ -68,7 +69,7 @@ export async function resolveMcp(input = {}, options = {}) {
   const endpoint = serviceUrl(suppliedArgs?.[1] ?? input.endpoint ?? ENDPOINT);
   const callbackPort = input.callbackPort ?? 3335;
   requireValue(Number.isInteger(callbackPort) && callbackPort > 0 && callbackPort < 65536, 'invalid callback port');
-  const args = suppliedArgs ? [...suppliedArgs] : [proxy, endpoint, String(callbackPort), '--host', CALLBACK_HOST, '--transport', 'http-only', '--resource', endpoint, '--auth-timeout', '600', '--connect-timeout', '20', '--headers-timeout', '20', '--body-timeout', '20'];
+  const args = suppliedArgs ? [...suppliedArgs] : [proxy, endpoint, String(callbackPort), '--host', CALLBACK_HOST, '--transport', 'http-only', '--resource', endpoint, '--auth-timeout', '600', '--connect-timeout', '20', '--headers-timeout', String(CALL_TIMEOUT_SECONDS), '--body-timeout', String(CALL_TIMEOUT_SECONDS)];
   requireValue(!args.some(value => ['--allow-http', '--skip-resource-parameter', '--debug'].includes(value)), 'unsafe or sensitive-output bridge option');
   const option = name => args[args.indexOf(name) + 1];
   requireValue(args.includes('--resource') && option('--resource') === endpoint, 'preserve the MCP resource parameter');
@@ -85,7 +86,7 @@ export async function resolveMcp(input = {}, options = {}) {
   return {
     client,
     native: { ...nativeInput, transport: 'stdio', serverName: input.serverName ?? 'fotor', command, args, env, cwd,
-      toolCallTimeoutMs: input.toolCallTimeoutMs ?? 25000, failOnStartupError: input.failOnStartupError ?? true, reconnect: { ...input.reconnect, enabled: false } },
+      toolCallTimeoutMs: input.toolCallTimeoutMs ?? CALL_TIMEOUT_SECONDS * 1000, failOnStartupError: input.failOnStartupError ?? true, reconnect: { ...input.reconnect, enabled: false } },
   };
 }
 /** Share desktop routing, but never copy ambient account credentials into the child. */
