@@ -36,10 +36,10 @@
       - --connect-timeout
       - '20'
       - --headers-timeout
-      - '20'
+      - '300'
       - --body-timeout
-      - '20'
+      - '300'
     env:
       MCP_REMOTE_CONFIG_DIR: /absolute/path/to/dsh-home/mcp-auth/fotor
     cwd: /absolute/path/to/workspace
-    toolCallTimeoutMs: 25000
+    toolCallTimeoutMs: 300000
