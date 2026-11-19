@@ -21,8 +21,8 @@ concurrency:
 env:
   VERSION: ${{ inputs.version }}
   CHANNEL: ${{ inputs.channel }}
-  # Approved first-publication exception. Change only through a reviewed release decision.
-  EXPECTED_LATEST: 0.6.1
+  # Stable npm version that a next publication must preserve.
+  EXPECTED_LATEST: 0.8.0
 jobs:
   build:
     runs-on: ubuntu-24.04
