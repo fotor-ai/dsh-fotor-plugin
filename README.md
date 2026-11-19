@@ -5,7 +5,7 @@
 <p align="center"><img src="assets/logo.svg" width="72" alt="Fotor logo" /></p>
 
 <p align="center">
-  <img src="https://img.shields.io/static/v1?label=version&amp;message=0.8.0&amp;color=087f8c&amp;style=flat-square" alt="Version" />
+  <img src="https://img.shields.io/static/v1?label=version&amp;message=0.8.1&amp;color=087f8c&amp;style=flat-square" alt="Version" />
   <img src="https://img.shields.io/static/v1?label=channel&amp;message=production&amp;color=238636&amp;style=flat-square" alt="Release channel" />
   <a href="LICENSE"><img src="https://img.shields.io/static/v1?label=license&amp;message=Apache-2.0&amp;color=57606a&amp;style=flat-square" alt="Apache-2.0 license" /></a>
 </p>
@@ -18,7 +18,7 @@ Create images, video and audio with Fotor through DeepSeek Harness Web and an au
 | Field | Value |
 | --- | --- |
 | Bundle | `@fotor-ai/dsh-fotor-plugin` |
-| Version | `0.8.0` |
+| Version | `0.8.1` |
 | Release channel | `production` |
 | Service environment | `production` |
 | MCP endpoint | `https://mcp.fotor.com/mcp` |
